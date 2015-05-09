@@ -1,0 +1,110 @@
+package com.example.koohar;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+/**
+ * Created by bozidar on 19.3.2015..
+ */
+public class Dnevni extends Activity {
+    TextView tv;
+    Button bu,recepti,but;
+
+  public  String sast;
+   public static ArrayList<String>selec;
+public  StringBuilder csvStr = new StringBuilder();
+   public static String[] val=new String[0];
+ArrayList<String> nazivi=new ArrayList<String>();
+    AutoCompleteTextView txt1;
+
+
+    @Override
+        public void onCreate (final Bundle savedInstanceState){
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_dnevni);
+        txt1=(AutoCompleteTextView) findViewById(R.id.editText);
+            tv = (TextView) findViewById(R.id.textView6);
+            bu = (Button) findViewById(R.id.testbutton);
+        but=(Button) findViewById(R.id.button8);
+            recepti = (Button) findViewById(R.id.button7);
+       selec=new ArrayList<String>();
+    csvStr=new StringBuilder();
+
+        //Calling a class that handles Sqlite operations
+        DBAdaptert ad=new DBAdaptert(this);
+        //Getting ingridients from database to put in suggestion box
+        nazivi=ad.getSastojci1();
+ArrayAdapter<String> adao=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,nazivi);
+        txt1.setAdapter(adao);
+
+            //Adding users input to an array-list
+        bu.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sast = txt1.getText().toString();
+                selec.add(sast);
+                    tv.setText("Upisani sastojci: " + selec);
+                }
+            });
+
+
+        }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.button7:
+                Intent tjedni= new Intent(Dnevni.this,DnevniRez.class);
+                startActivity(tjedni);
+                break;
+            case R.id.button8:
+                Intent dnevni=new Intent(Dnevni.this,MainActivity.class);
+                startActivity(dnevni);
+                break;
+        }
+        return true;
+    }
+    //Converting array-list with users input into csv format
+    public String getSast(){
+
+        val =selec.toArray(new String[selec.size()]);
+        for (int i = 0; i < val.length; i++) {
+            if (val.length > 1 && i != 0) {
+                csvStr.append(",");
+            }
+            csvStr.append("'").append(val[i]).append("'");
+        }
+        return csvStr.toString();
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.dnevni, menu);
+        return true;
+    }
+    }
+
+
+
+
+
