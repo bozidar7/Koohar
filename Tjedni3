@@ -1,0 +1,96 @@
+package com.example.koohar;
+
+
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.app.Activity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+
+
+public class Recepti extends Activity {
+    TextView tablica, opis=null;
+    ArrayList<String> lista=new ArrayList<String>();
+Button povratak;
+ListView list;
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_recepti);
+
+        list = (ListView) findViewById(R.id.listView3);
+        tablica = (TextView) findViewById(R.id.textView1);
+        opis = (TextView) findViewById(R.id.textView3);
+         povratak=(Button) findViewById(R.id.button3);
+        //executing asynctask
+        new Asink().execute();
+    }
+    
+    //Navigation menu
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+
+            case R.id.button3:
+                Intent dnevni=new Intent(Recepti.this,Sqlview.class);
+                startActivity(dnevni);
+                break;
+        }
+        return true;
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.recepti, menu);
+        return true;
+    }
+    
+    //Creating a class to handle network operations
+    protected class Asink extends AsyncTask<Void, Void, Void> {
+        String im,sas,op;
+        int total;
+        @Override
+        protected Void doInBackground(Void... voids) {
+          Upravljanje up= new Upravljanje();
+            //Getting recipe name
+            im=up.getData();
+            //Getting ingridients
+            sas=up.getData1();
+            //Getting description
+            op=up.opis();
+            //Getting price
+            total=up.cijena();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            tablica.setText(im);
+            opis.setText(op);
+            lista.add(sas);
+            //Creating an array to put ingridients in
+            ArrayAdapter<String> adap=new ArrayAdapter<String>(Recepti.this,android.R.layout.simple_list_item_1,lista);
+           list.setAdapter(adap);
+        }
+    }
+
+
+}
+
+
