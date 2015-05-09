@@ -1,0 +1,134 @@
+package com.example.koohar;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
+import android.os.Bundle;
+import android.widget.Toast;
+
+
+import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+//Creating a class that will get prefilled database from assets
+public class DBAdaptert extends SQLiteAssetHelper {
+    Dnevni dan= new Dnevni();
+    DnevniRez dan2=new DnevniRez();
+  public  ArrayList<String> ime=new ArrayList<String>();
+public static ArrayList<String> sastojci=new ArrayList<String>();
+    private static final String DATABASE_NAME = "recept.db";
+    private static final int DATABASE_VERSION = 2;
+    public DBAdaptert(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        setForcedUpgrade(2);
+    }
+
+   //Getting recipe name
+    public ArrayList<String> getIme(){
+        ArrayList<String> map2=new ArrayList<String>();
+
+        SQLiteDatabase db = getReadableDatabase();
+         String query="SELECT * FROM recept,sastojci,sastav_recepta WHERE naziv IN ("+dan.getSast()+") AND sastojci._id=sastav_recepta.idsastojka" +" AND"+" "+
+                 "recept._id=sastav_recepta.idrecepta";
+       Cursor cursor= db.rawQuery(query,null);
+        if(cursor.moveToFirst()){
+            do{
+                map2.add(cursor.getString(cursor.getColumnIndex("ime")));
+            }while(cursor.moveToNext());
+        }
+        db.close();
+
+        return map2;
+    }
+//Getting recipe name that user chose to read
+    public String getRecept(){
+        String ime_rec1="";
+        SQLiteDatabase db = getReadableDatabase();
+        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+        String query="SELECT ime FROM recept WHERE ime LIKE "+ dan2.getItem()+"";
+        Cursor cursor= db.rawQuery(query,null);
+
+           if(cursor.moveToFirst()) {
+               ime_rec1 = cursor.getString(cursor.getColumnIndex("ime"));
+           }
+        db.close();
+
+        return ime_rec1;
+    }
+//Getting ingridients
+    public ArrayList<HashMap<String, String>> getSastojci(){
+        String ime_rec1="";
+        ArrayList<HashMap<String,String>>imeList=new ArrayList<HashMap<String, String>>();
+        SQLiteDatabase db = getReadableDatabase();
+        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+        String query="SELECT ime,naziv,kolicina,mj_jedinica FROM recept,sastojci,sastav_recepta WHERE ime LIKE "+ dan2.getItem()+" AND sastojci._id=sastav_recepta.idsastojka"+" "+"AND"+" "+
+                " recept._id=sastav_recepta.idrecepta";
+        Cursor cursor= db.rawQuery(query,null);
+
+        if(cursor.moveToFirst()) {
+            do{
+                HashMap<String,String> map4=new HashMap<String, String>();
+               map4.put("naziv",cursor.getString(cursor.getColumnIndex("naziv")));
+                map4.put("kolicina",cursor.getString(cursor.getColumnIndex("kolicina")));
+                map4.put("mj_jedinica",cursor.getString(cursor.getColumnIndex("mj_jedinica")));
+
+                imeList.add(map4);
+            }while(cursor.moveToNext());
+        }
+        db.close();
+
+        return imeList;
+    }
+//Getting description
+    public ArrayList<String> getOpis(){
+        String ime_rec1="";
+        ArrayList<HashMap<String,String>>imeList=new ArrayList<HashMap<String, String>>();
+        ArrayList<String> map4=new ArrayList<String>();
+        SQLiteDatabase db = getReadableDatabase();
+        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+        String query="SELECT ime,opis FROM recept,sastojci,sastav_recepta WHERE ime LIKE "+ dan2.getItem()+" AND sastojci._id=sastav_recepta.idsastojka"+" "+"AND"+" "+
+                " recept._id=sastav_recepta.idrecepta";
+        Cursor cursor= db.rawQuery(query,null);
+
+        if(cursor.moveToFirst()) {
+            do{
+                map4.add(cursor.getString(cursor.getColumnIndex("opis")));
+            }while(cursor.moveToNext());
+        }
+        db.close();
+        return map4;
+
+    }
+  //Getting ingridients for suggestion box
+    public ArrayList<String> getSastojci1(){
+        ArrayList<String> map4=new ArrayList<String>();
+        SQLiteDatabase db = getReadableDatabase();
+        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+        String query="SELECT naziv FROM sastojci";
+        Cursor cursor= db.rawQuery(query,null);
+
+        if(cursor.moveToFirst()) {
+            do{
+
+                map4.add(cursor.getString(cursor.getColumnIndex("naziv")));
+           }while(cursor.moveToNext());
+        }
+        db.close();
+        return map4;
+    }
+}
+
+
+
