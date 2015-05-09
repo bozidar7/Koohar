@@ -1,0 +1,117 @@
+package com.example.koohar;
+
+import android.app.ActionBar;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.app.Activity;
+import android.content.Intent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+
+public class Sqlview extends Activity implements ActionBar.OnNavigationListener {
+    TextView ost;
+    Asink1 asi= new Asink1();
+    Button recept,back;
+    Spinner dan;
+    int bud;
+    String savedValue;
+
+    int cijena;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sqlview);
+        recept = (Button) findViewById(R.id.button2);
+        back=(Button) findViewById(R.id.button);
+        ost=(TextView) findViewById(R.id.textView);
+        dan = (Spinner) findViewById(R.id.spinner1);
+         Intent dani=getIntent();
+        bud=dani.getIntExtra("budzet",0);
+        savedValue=dan.getSelectedItem().toString();
+
+
+
+       //Calling asynctask
+        asi.execute();
+
+
+    }
+    //Defining nav. menu
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.button2:
+                Intent tjedni= new Intent(Sqlview.this,Recepti.class);
+                startActivity(tjedni);
+                break;
+            case R.id.button:
+                Intent dnevni=new Intent(Sqlview.this,Tjedni.class);
+                startActivity(dnevni);
+                break;
+            case R.id.spinner1:
+
+
+        }
+        return true;
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.sqlview, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(int i, long l) {
+        return false;
+    }
+
+    //Creating AsyncTask for handling net operations
+    protected class Asink1 extends AsyncTask<Void, Void, Integer> {
+
+        int total;
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            Upravljanje up= new Upravljanje();
+
+            //Adding price until the value of the users budget
+           for(int i=0;i<=bud;i++) {
+               cijena = up.cijena() + up.cijena();
+           }
+
+            total=bud-cijena;
+            return total;
+        }
+
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            super.onPostExecute(result);
+
+                     for(int j=0;j<=7;j++) {
+                         if (savedValue.equals(dan.getItemAtPosition(j).toString())) {
+                             dan.setSelection(j);
+                             break;
+                         }
+                     }
+
+            ost.setText("Ostatak: "+total);
+           }
+
+        }
+    }
+
+
+
+
+
